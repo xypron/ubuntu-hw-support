@@ -20,6 +20,14 @@ Install dependencies
 Clone the gadget repository
 ---------------------------
 
+.. note::
+
+    The ``main`` branch should contain a gadget targetting current Ubuntu **development release**.
+    LTS branches like ``resolute`` and ``noble`` are available (add ``-b <branch>`` to the command below).
+
+    If the target hardware does not support the RVA23 profile, ``noble`` is the only possible option,
+    as ``resolute`` and above require RVA23.
+
 .. prompt:: text $ auto
 
     $ git clone https://github.com/canonical/risc-v-gadget.git
@@ -35,12 +43,6 @@ Build the image
 Test the image
 --------------
 
-For running the image in a virtual machine install the runtime dependencies.
-
-.. prompt:: text $ auto
-
-    $ sudo apt-get install opensbi qemu-system-riscv64 u-boot-qemu
-
 Navigate to the image and change the owner.
 
 .. prompt:: text $ auto
@@ -48,17 +50,8 @@ Navigate to the image and change the owner.
     $ cd workdir
     $ sudo chown $USER ubuntu-*-preinstalled-server-riscv64.img
 
-Launch the virtual machine.
-
-.. prompt:: text $ auto
-
-    $ qemu-system-riscv64 \
-      -machine virt -nographic -m 2048 -smp 4 \
-      -bios /usr/lib/riscv64-linux-gnu/opensbi/generic/fw_jump.bin \
-      -kernel /usr/lib/u-boot/qemu-riscv64_smode/uboot.elf \
-      -device virtio-net-device,netdev=eth0 -netdev user,id=eth0 \
-      -device virtio-rng-pci \
-      -drive file=ubuntu-*-preinstalled-server-riscv64.img,format=raw,if=virtio
+See :ref:`Install Ubuntu on QEMU (RISC-V) <qemu-riscv-edk2>`.
+for the command to launch the virtual machine.
 
 Login with user *ubuntu* and password *ubuntu*.
 
