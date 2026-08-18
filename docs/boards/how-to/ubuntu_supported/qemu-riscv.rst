@@ -119,6 +119,7 @@ Running via U-Boot
 * Login with the user *ubuntu* and the default password *ubuntu*; you will be
   asked to choose a new password.
 
+.. _qemu-riscv-edk2:
 
 Running via EDK II
 ~~~~~~~~~~~~~~~~~~
