@@ -22,7 +22,7 @@ Clone the gadget repository
 
 .. note::
 
-    The ``main`` branch should contain a gadget targetting current Ubuntu **development release**.
+    The ``main`` branch should contain a gadget targeting current Ubuntu **development release**.
     LTS branches like ``resolute`` and ``noble`` are available (add ``-b <branch>`` to the command below).
 
     If the target hardware does not support the RVA23 profile, ``noble`` is the only possible option,
