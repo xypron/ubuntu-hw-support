@@ -61,6 +61,7 @@ KMS
 KVM
 Kbits
 Keyid
+kubuntu
 LXC
 LicheeRV
 MBR
@@ -270,6 +271,7 @@ tx
 txt
 uaccess
 ubuntu
+ubuntustudio
 ukpack
 umount
 unformatted
@@ -279,9 +281,11 @@ Upgrader
 userland
 usr
 utilize
+vmdk
 whois
 wifi
 wokeignore
+xubuntu
 xz
 yaml
 yml
