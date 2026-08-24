@@ -1,9 +1,9 @@
 .. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. _creating-customized-live-installer-images:
+.. _customize-installer-images:
 
-Creating customized installer images
-====================================
+Customize installer images
+===========================
 
 Both pre-installed images and installer images are available for Ubuntu.
 
