@@ -1,91 +1,102 @@
 .. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. _creating-customized-live-installer-images:
+.. _create-installer-image:
 
-Creating customized installer images
-====================================
+Create installer image
+=======================
 
-Both pre-installed images and installer images are available for Ubuntu.
+As of 2026 :lp-pkg:`livecd-rootfs` is the tool used by Canonical to create
+both preinstalled images as well as installer images.
 
-The build process of installer images involves multiple steps:
+You can install it with
 
-* Ubuntu package :lp-pkg:`livecd-rootfs` is used to create multiple file system
-  layers as squashfs file systems, e.g.
+.. prompt:: text $ auto
 
-  - livecd.ubuntu-server.ubuntu-server-minimal.squashfs
-  - livecd.ubuntu-server.ubuntu-server-minimal.ubuntu-server.installer.generic.squashfs
-  - livecd.ubuntu-server.ubuntu-server-minimal.ubuntu-server.installer.squashfs
-  - livecd.ubuntu-server.ubuntu-server-minimal.ubuntu-server.squashfs
+    $ sudo apt-get update
+    $ sudo apt-get livecd-rootfs
 
-* `Ubuntu-cdimage <https://git.launchpad.net/ubuntu-cdimage>`_ takes these
-  squashfs file systems and packages them as an ISO image.
+The package provides three scripts in /usr/share/livecd-rootfs/live-build/auto/:
 
-Patching these tools to create an ISO image is tedious and error-prone.
+clean
+    Remove build artifacts
 
-It is much easier to take an existing live-installer image and to patch it to
-your needs. `Livefs-editor <https://github.com/mwhudson/livefs-editor>`_
-is the tool of choice for this task.
+config
+    Configure build
 
-Installing livefs-editor
-------------------------
+build
+    Execute the build
 
-Livefs-editor can be installed in a Python virtual environment with:
+Here is an example of building a riscv64 ubuntu-server installer image:
 
-.. code-block:: text
+.. prompt:: text $ auto
 
-    git clone https://github.com/mwhudson/livefs-editor.git
-    cd livefs-editor/
-    python3 -m venv myvenv
-    . myvenv/bin/activate
-    pip install .
+    sudo /usr/share/livecd-rootfs/live-build/auto/clean
 
-For a system-wide installation you can use:
+    sudo \
+    ARCH=riscv64 \
+    PROJECT=ubuntu-server \
+    SUBPROJECT=live \
+    SUITE=resolute \
+    /usr/share/livecd-rootfs/live-build/auto/config
 
-.. code-block:: text
+    sudo \
+    ARCH=riscv64 \
+    PROJECT=ubuntu-server \
+    SUBPROJECT=live \
+    SUITE=resolute \
+    /usr/share/livecd-rootfs/live-build/auto/build
 
-    sudo python3 -m pip install --break-system-packages .
+The output of this build is file 'livecd.ubuntu-server.iso*.
 
-Using livefs-editor
--------------------
+Which image is built is controlled by environment variables.
 
-The livefs-editor `README
-<https://github.com/mwhudson/livefs-editor/blob/main/README.md#actions>`_
-gives an overview of the different actions that the tool can take.
++---------------+----------+-----------------------------------------------------------------------------+
+| Variable      | Required | Usage                                                                       |
++===============+==========+=============================================================================+
+| ARCH          | required | Ubuntu architecture (e.g. risc       v64)                                   |
++---------------+----------+-----------------------------------------------------------------------------+
+| EXTRA_PPAS    | optional | A space separated string, e.g. ``"user1/ppa1 user1/ppa2 user2/ppa3"``.      |
+|               |          | The PPA string may contain a pin priority, e.g. ``"user1/ppa1:300"``.       |
++---------------+----------+-----------------------------------------------------------------------------+
+| EXTRA_SNAPS   | optional |                                                                             |
++---------------+----------+-----------------------------------------------------------------------------+
+| IMAGEFORMAT   | optional | *ext2*, *ext3*, *ext4*, *plain*, *ubuntu-image*, *none*                     |
++---------------+----------+-----------------------------------------------------------------------------+
+| IMAGE_TARGETS | optional | *disk-image*, *qcow2*, *squashfs*, *tarball*, *vmdk*                        |
++---------------+----------+-----------------------------------------------------------------------------+
+| MIRROR        | optional | Mirror used for installing packages. If not set, is selected automatically. |
++---------------+----------+-----------------------------------------------------------------------------+
+| PROJECT       | required | *ubuntu-cpc*, *ubuntu-server*, *ubuntustudio*, *ubuntu*, *kubuntu*, ...     |
++---------------+----------+-----------------------------------------------------------------------------+
+| PROPOSED      | optional | ``PROPOSED=1`` selects the proposed pocket for packages                     |
++---------------+----------+-----------------------------------------------------------------------------+
+| SEEDMIRROR    | internal | Defaults to https://people.canonical.com/~ubuntu-archive/seeds/             |
++---------------+----------+-----------------------------------------------------------------------------+
+| SUBARCH       | optional | Used only for ``$IMAGEFORMAT="ubuntu-image"``                               |
++---------------+----------+-----------------------------------------------------------------------------+
+| SUBPROJECT    | optional | E.g. *live* (for ubuntu-server), *minimized* (for minimized images)         |
++---------------+----------+-----------------------------------------------------------------------------+
+| SUITE         | required | Ubuntu release, e.g. *resolute* for Ubuntu 26.04                            |
++---------------+----------+-----------------------------------------------------------------------------+
 
-Best practice is to use a yaml file describing all desired actions and
-to invoke livefs-editor with it. The livefs-edit command must be run as
-root.
+Here are some useful property combinations:
 
-.. code-block:: text
++----------------------------+---------------+------------+-------------+
+| Image                      | PROJECT       | SUBPROJECT | IMAGEFORMAT |
++============================+===============+============+=============+
+| RISC-V preinstalled server | ubuntu-cpc    | generic    | ext4        |
++----------------------------+---------------+------------+-------------+
+| Ubuntu server installer    | ubuntu-server | live       |             |
++----------------------------+---------------+------------+-------------+
+| Ubuntu desktop             | ubuntu        | live       |             |
++----------------------------+---------------+------------+-------------+
+| Xubuntu desktop            | xubuntu       | live       |             |
++----------------------------+---------------+------------+-------------+
+| Xubuntu minimal desktop    | xubuntu       | minimal    |             |
++----------------------------+---------------+------------+-------------+
 
-    sudo -s
-    . myvenv/bin/activate
-    livefs-edit old.iso new.iso --action-yaml update.yaml
+For a full overview consult the livecd-rootfs source code available at
+https://git.launchpad.net/ubuntu/+source/livecd-rootfs.
 
-Here is an example yaml file:
-
-.. code-block:: yaml
-
-    ---
-    - name: cp
-      source: /home/ubuntu/project/ppa.sources
-      dest: $LAYERS[0]/etc/apt/sources.list.d/vendor-ppa.sources
-    - name: install-packages
-      packages:
-      - vendor-package1
-      - vendor-package2
-    - name: rm
-      path: new/iso/pool/main/e/efivar/libefiboot1_37-6ubuntu2_riscv64.deb
-    - name: replace-kernel
-      flavor: vendorflavor
-
-The ``cp`` action sets up the vendor PPA to allow installing vendor specific
-packages from there.
-
-These are installed by the ``install-packages`` action.
-
-With the ``rm`` action a package is removed from the ISO.
-
-The ``replace-kernel`` action replaces the generic Linux kernel by a vendor
-kernel package linux-image-vendorflavor located in the vendor PPA with all
-its dependencies.
+There are significant changes between the livecd-rootfs packages of different
+Ubuntu releases.

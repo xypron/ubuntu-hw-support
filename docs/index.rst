@@ -85,7 +85,9 @@ Launchpad infrastructure to creating distributable Ubuntu images for new
 hardware.
 
 * **Getting started**: :ref:`Image Cookbook overview <image-overview>` • :ref:`Your first Ubuntu image <your-first-ubuntu-image>`
-* **Image creation**: :ref:`Create image with ubuntu-image <create-customized-image-with-ubuntu-image>` • :ref:`Create installer images <creating-customized-live-installer-images>`
+* **Image creation**: :ref:`Create image with ubuntu-image <create-customized-image-with-ubuntu-image>`
+  • :ref:`Create installer image <create-installer-image>`
+  • :ref:`Customize installer images <customize-installer-images>`
 * **Kernel packages**: :ref:`Your first kernel package <your-first-kernel-package>` • :ref:`Package a custom kernel <package-kernel>`
 * **Packaging**: :ref:`Package binaries as .deb <package-binaries>` • :ref:`Repackage binaries <repackage-binaries>`
 
